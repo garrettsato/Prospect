@@ -1,5 +1,4 @@
-import java.io.File;
-import java.io.FileWriter;
+import java.io.*;
 import java.util.Random;
 
 import weka.classifiers.Evaluation;
@@ -11,7 +10,8 @@ public class NaiveBayesSample {
 	
 	public static void main (String[] args) throws Exception {
 		DataSource source = new DataSource("/home/tsai0606/Prospect/Prospect_Data/digit/mnist1000.pixel.arff");
-		FileWriter output = new FileWriter(new File("NaiveBayesresult"));
+		FileWriter fstream = new FileWriter("NaiveBayes");
+		BufferedWriter output = new BufferedWriter(fstream);
 		Instances data = source.getDataSet();
 		if (data.classIndex() == -1)
 			data.setClassIndex(data.numAttributes() - 1);
@@ -27,7 +27,7 @@ public class NaiveBayesSample {
 		 eval.crossValidateModel(tree, data, 10, new Random(1));
 		 
 		 output.write(eval.toSummaryString());
-		 System.out.println(eval.toSummaryString());
+		 output.close();
 		 System.out.println("done");
 	}
 }

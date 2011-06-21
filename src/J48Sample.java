@@ -10,7 +10,8 @@ public class J48Sample {
 	
 	public static void main (String[] args) throws Exception {
 		DataSource source = new DataSource("/home/tsai0606/Prospect/Prospect_Data/digit/mnist1000.pixel.arff");
-		FileWriter output = new FileWriter(new File("J48result"));
+		FileWriter fstream = new FileWriter("J48result");
+		BufferedWriter output = new BufferedWriter(fstream);
 		Instances data = source.getDataSet();
 		if (data.classIndex() == -1)
 			data.setClassIndex(data.numAttributes() - 1);
@@ -26,6 +27,7 @@ public class J48Sample {
 		 eval.crossValidateModel(tree, data, 10, new Random(1));
 		 
 		 output.write(eval.toSummaryString());
+		 output.close();
 		 System.out.println("done");
 	}
 }
