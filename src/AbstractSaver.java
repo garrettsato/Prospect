@@ -1,3 +1,12 @@
+/**
+ * Concern for now: 
+ * 		1. Cross evaluation needs randomization
+ *  	2. Each example includes the result of evaluation that what predicted label
+ *         the each configuration came up with (see 3 as well) 
+ * 		3. Ways to track specific examples
+ * 
+ */
+
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Random;
@@ -62,7 +71,7 @@ public class AbstractSaver {
 	}
 		
 	public static void main (String[] args) throws Exception {
-		DataSource source = new DataSource("/Users/garrettsato/Downloads/mnist1000.pixel.arff");
+		DataSource source = new DataSource("/home/tsai0606/Prospect/Prospect_Data/digit/mnist1000.pixel.arff");
 		J48 tree = new J48();
 		String[] options = new String[1];
 		options[0] = "-U"; 
