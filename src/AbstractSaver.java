@@ -19,7 +19,6 @@ public class AbstractSaver {
 	Instances randData;
 	Evaluation eval;
 	int folds;
-	String[] options;
 	Classifier cls;
 	
 	public AbstractSaver (DataSource source, int folds, Classifier cls) throws Exception {
@@ -29,33 +28,48 @@ public class AbstractSaver {
 			data.setClassIndex(data.numAttributes() - 1);
 		}
 			
-		 options = new String[1];
-		 options[0] = "-U";
+		 
 		 Random rand = new Random(1920);   // create seeded number generator
 		 randData = new Instances(data);   // create copy of original data
 		 randData.randomize(rand);
-		 folds = 10;
+		 this.folds = 10;
 		 eval = new Evaluation(randData);
+		 this.cls = cls;
+		 randData.numInstances();
+		 
 	}
 	
-	public double[][] evaluate(Classifier cls) throws Exception {
-		 
+	public double[][] evaluate() throws Exception {
+		 System.out.println(randData.numInstances());
 		 for (int n = 0; n < folds; n++) {
 			   Instances train = randData.trainCV(folds, n);
 			   Instances test = randData.testCV(folds, n);         
-			   cls.setOptions(options);     
-			   .buildClassifier(train);
-			
+			        
+			   cls.buildClassifier(train);
+			   
+			   System.out.println(train.numInstances());
+			   System.out.println(test.numInstances());
 			   Enumeration<Instance> enums = test.enumerateInstances();
 			   while (enums.hasMoreElements()) {
 				   Instance ins = enums.nextElement();
 				   System.out.println("Ground truth label: " + ins.classValue() + "\t\t\t\t" +
-				   		"Predicted Label: " + eval.evaluateModelOnce(tree, ins));
+				   		"Predicted Label: " + eval.evaluateModelOnce(cls, ins));
 			   }
 		 }
 		 System.out.println(eval.toSummaryString());
-		return null;
+		 
+		 return null;
+	}
 		
+	public static void main (String[] args) throws Exception {
+		DataSource source = new DataSource("/Users/garrettsato/Downloads/mnist1000.pixel.arff");
+		J48 tree = new J48();
+		String[] options = new String[1];
+		options[0] = "-U"; 
+		tree.setOptions(options);
+		AbstractSaver j48tree = new AbstractSaver(source, 10, tree);
+		j48tree.evaluate();
+	}
 /*		 Evaluation eval = new Evaluation(data);
 		 eval.crossValidateModel(tree, data, 10, new Random(1));
 		 double[][] confusionMatrix = eval.confusionMatrix();
@@ -115,5 +129,5 @@ public class AbstractSaver {
 		 for (int i = 0; i < labeledArray.length; i++) {
 			 System.out.println("Ground truth label: " + unlabeledArray[i] + "\t\t\tPredicted Label: " + labeledArray[i]);
 		 }*/
-	}
+	
 }
