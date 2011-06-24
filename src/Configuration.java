@@ -9,19 +9,24 @@ import weka.core.*;
 public class Configuration {
 	
 	private double accuracy;
-	private Classifier classifier;
+	public Classifier classifier;
 	private String[] options;
 	private Map<Instance, Double> inst_to_pl;
 	
 	
-	public Configuration() throws Exception {
+	public Configuration(Instances data) throws Exception {
 		classifier = new J48();
 		options = new String[1];
-		options[0] = "-U"; 
+		options[0] = "-U";
 		((J48) classifier).setOptions(options);
+		
+		Instances train = data.trainCV(4, 0);
+		classifier.buildClassifier(train);
+		
 		inst_to_pl = new HashMap<Instance, Double>();
 
 	}
+	
 	
 	public void insertInstance(Instance example) {
 		inst_to_pl.put(example, example.classValue());
