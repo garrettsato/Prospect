@@ -1,9 +1,11 @@
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Random;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
+import weka.classifiers.meta.FilteredClassifier;
 import weka.classifiers.trees.J48;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -13,6 +15,9 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import weka.core.Instances;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.AddID;
+import weka.filters.unsupervised.attribute.Remove;
 
 public class AbstractSaver {
 	
@@ -20,6 +25,9 @@ public class AbstractSaver {
 	Evaluation eval;
 	int folds;
 	Classifier cls;
+	Instance secondFirstInstance;
+	Instance firstInstance;
+	Instances newData;
 	
 	public AbstractSaver (DataSource source, int folds, Classifier cls) throws Exception {
 		//DataSource source = new DataSource("/Users/garrettsato/Downloads/mnist1000.pixel.arff");
@@ -27,36 +35,61 @@ public class AbstractSaver {
 		if (data.classIndex() == -1) {
 			data.setClassIndex(data.numAttributes() - 1);
 		}
-			
-		 
+			 
 		 Random rand = new Random(1920);   // create seeded number generator
 		 randData = new Instances(data);   // create copy of original data
-		 randData.randomize(rand);
+		 // randData.randomize(rand);
+		 AddID add = new AddID();
+		 add.setInputFormat(randData);
+		 newData = Filter.useFilter(randData, add);
+		 Enumeration<Instance> enums = newData.enumerateInstances();
+		 while (enums.hasMoreElements()) {
+			 Instance ins = enums.nextElement();
+			 add.input(ins);
+			 System.out.println(ins.value(0));
+		 } 
+		 newData.randomize(rand);
 		 this.folds = 10;
 		 eval = new Evaluation(randData);
 		 this.cls = cls;
 		 randData.numInstances();
+		 this.firstInstance = randData.firstInstance();
+		 HashMap<Instance, Double> map = new HashMap<Instance, Double>();
+		 map.put(firstInstance, 14.0);
+		 this.secondFirstInstance = data.firstInstance();
+		 //System.out.println(map.containsKey(secondFirstInstance));
 		 
 	}
 	
-	public double[][] evaluate() throws Exception {
+	public Configuration evaluate() throws Exception {
 		 System.out.println(randData.numInstances());
+		 Remove rm = new Remove();
+		 rm.setAttributeIndices("1"); 
+		 FilteredClassifier fc = new FilteredClassifier();
+		 fc.setFilter(rm);
+		 fc.setClassifier(cls);
+		 
 		 for (int n = 0; n < folds; n++) {
-			   Instances train = randData.trainCV(folds, n);
-			   Instances test = randData.testCV(folds, n);         
-			        
-			   cls.buildClassifier(train);
+			   Instances train = newData.trainCV(folds, n);
+			   Instances test = newData.testCV(folds, n);         
+			   fc.buildClassifier(train);
+			   Enumeration<Instance> enums = newData.enumerateInstances();
+
+			   for (int i = 0; i < test.numInstances(); i++) {
+				   double pred = fc.classifyInstance(test.instance(i));
+				   System.out.print("ID: " + test.instance(i).value(0));
+				   System.out.print(", actual: " + test.classAttribute().value((int) test.instance(i).classValue()));
+				   System.out.println(", predicted: " + test.classAttribute().value((int) pred));
+				 }	   
+				   
+		//		   System.out.println(firstInstance.equals(secondFirstInstance));
+		//		   System.out.println(eval.evaluateModelOnce(cls, firstInstance));
+		//		   System.out.println(eval.evaluateModelOnce(cls, secondFirstInstance));
+				  // System.out.println("Ground truth label: " + ins.attribute((int)ins.classValue()) + "\t\t\t\t" +
+			//	   		"Predicted Label: " + eval.evaluateModelOnce(cls, ins));
 			   
-			   System.out.println(train.numInstances());
-			   System.out.println(test.numInstances());
-			   Enumeration<Instance> enums = test.enumerateInstances();
-			   while (enums.hasMoreElements()) {
-				   Instance ins = enums.nextElement();
-				   System.out.println("Ground truth label: " + ins.classValue() + "\t\t\t\t" +
-				   		"Predicted Label: " + eval.evaluateModelOnce(cls, ins));
-			   }
 		 }
-		 System.out.println(eval.toSummaryString());
+		 //System.out.println(eval.toSummaryString());
 		 
 		 return null;
 	}
