@@ -14,21 +14,26 @@ import weka.filters.unsupervised.attribute.Remove;
 public class AbstractSaver {
 	private static final int SEED = 1920;
 	private static final int FOLDS = 10;
-	private static Classifier CLASSIFIER = new J48();
+	private static J48 CLASSIFIER = new J48();
 	
 	Instances randData;
 	Evaluation eval;
 	
 	public static void main (String[] args) throws Exception {
 		//DataSource source = new DataSource("/Users/garrettsato/Downloads/mnist1000.pixel.arff");
-		DataSource source = new DataSource("/home/tsai0606/Prospect/Prospect_Data/digit/mnist1000.pixel.arff");
+		DataSource source = new DataSource("/Users/garrettsato/Downloads/mnist1000.pixel.arff");
 		
 		// Setting J48 to be the configuration for this case with option set to -U
 		String[] options = new String[1];
 		options[0] = "-U"; 
-		((J48) CLASSIFIER).setOptions(options);
-		
+		CLASSIFIER.setOptions(options);
+		options = CLASSIFIER.getOptions();
+		for (int i = 0; i < options.length; i++) {
+			System.out.print(options[i] + ", ");
+		}
 
+		System.out.println(CLASSIFIER.getClass().getName());
+		
 		Instances data = source.getDataSet();
 		if (data.classIndex() == -1) {
 			data.setClassIndex(data.numAttributes() - 1);
@@ -40,6 +45,8 @@ public class AbstractSaver {
 		 Instances dataWithId = Filter.useFilter(data, add);		// adding ID to dataset
 
 		 dataWithId.randomize(rand);
+		 Configuration config = new Configuration(CLASSIFIER.getClass().getName(), 
+				 CLASSIFIER.getOptions(), data.numInstances() + 1, 10);
 
 		 
 		 Remove rm = new Remove();
@@ -56,11 +63,23 @@ public class AbstractSaver {
 
 			   for (int i = 0; i < test.numInstances(); i++) {
 				   double pred = fc.classifyInstance(test.instance(i));
-				   System.out.print("ID: " + test.instance(i).value(0));
-				   System.out.print(", actual: " + test.classAttribute().value((int) test.instance(i).classValue()));
-				   System.out.println(", predicted: " + test.classAttribute().value((int) pred));
-				 }	   		   
+//				   System.out.print("ID: " + test.instance(i).value(0));
+//				   System.out.print(", actual: " + test.classAttribute().value((int) test.instance(i).classValue()));
+//				   System.out.println(", predicted: " + test.classAttribute().value((int) pred));;
+//				   double[] distrib = fc.distributionForInstance(test.instance(i));
+//				   for (int k = 0; k < distrib.length; k++) {
+//					   System.out.print(distrib[k] + ", ");
+////				   }
+//				   System.out.println();
+				   config.setPredictedLabels((int)test.instance(i).value(0), test.classAttribute().value((int) pred));
+			 }	
+			   
+			  
 		 } 
+		 String[] predictedLabels = config.getPredictedLables();
+		 for (int i = 0; i < predictedLabels.length; i++) {
+			   System.out.print(predictedLabels[i] + ", ");
+		   }
 
 	}
 
