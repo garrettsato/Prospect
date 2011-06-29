@@ -1,6 +1,3 @@
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Random;
 
 import weka.classifiers.Classifier;
@@ -10,157 +7,61 @@ import weka.classifiers.trees.J48;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.AddID;
 import weka.filters.unsupervised.attribute.Remove;
 
 public class AbstractSaver {
+	private static final int SEED = 1920;
+	private static final int FOLDS = 10;
+	private static Classifier CLASSIFIER = new J48();
 	
 	Instances randData;
 	Evaluation eval;
-	int folds;
-	Classifier cls;
-	Instance secondFirstInstance;
-	Instance firstInstance;
-	Instances newData;
 	
-	public AbstractSaver (DataSource source, int folds, Classifier cls) throws Exception {
+	public static void main (String[] args) throws Exception {
 		//DataSource source = new DataSource("/Users/garrettsato/Downloads/mnist1000.pixel.arff");
+		DataSource source = new DataSource("/home/tsai0606/Prospect/Prospect_Data/digit/mnist1000.pixel.arff");
+		
+		// Setting J48 to be the configuration for this case with option set to -U
+		String[] options = new String[1];
+		options[0] = "-U"; 
+		((J48) CLASSIFIER).setOptions(options);
+		
+
 		Instances data = source.getDataSet();
 		if (data.classIndex() == -1) {
 			data.setClassIndex(data.numAttributes() - 1);
 		}
 			 
-		 Random rand = new Random(1920);   // create seeded number generator
-		 randData = new Instances(data);   // create copy of original data
-		 // randData.randomize(rand);
+		 Random rand = new Random(SEED);   // create seeded number generator
 		 AddID add = new AddID();
-		 add.setInputFormat(randData);
-		 newData = Filter.useFilter(randData, add);
-		 Enumeration<Instance> enums = newData.enumerateInstances();
-		 while (enums.hasMoreElements()) {
-			 Instance ins = enums.nextElement();
-			 add.input(ins);
-			 System.out.println(ins.value(0));
-		 } 
-		 newData.randomize(rand);
-		 this.folds = 10;
-		 eval = new Evaluation(randData);
-		 this.cls = cls;
-		 randData.numInstances();
-		 this.firstInstance = randData.firstInstance();
-		 HashMap<Instance, Double> map = new HashMap<Instance, Double>();
-		 map.put(firstInstance, 14.0);
-		 this.secondFirstInstance = data.firstInstance();
-		 //System.out.println(map.containsKey(secondFirstInstance));
+		 add.setInputFormat(data);		
+		 Instances dataWithId = Filter.useFilter(data, add);		// adding ID to dataset
+
+		 dataWithId.randomize(rand);
+
 		 
-	}
-	
-	public Configuration evaluate() throws Exception {
-		 System.out.println(randData.numInstances());
 		 Remove rm = new Remove();
-		 rm.setAttributeIndices("1"); 
+		 rm.setAttributeIndices("1"); 		// filter ID, if don't, it would affect training result
 		 FilteredClassifier fc = new FilteredClassifier();
 		 fc.setFilter(rm);
-		 fc.setClassifier(cls);
+		 fc.setClassifier(CLASSIFIER);
 		 
-		 for (int n = 0; n < folds; n++) {
-			   Instances train = newData.trainCV(folds, n);
-			   Instances test = newData.testCV(folds, n);         
+		 for (int n = 0; n < FOLDS; n++) {
+			   Instances train = dataWithId.trainCV(FOLDS, n);
+			   Instances test = dataWithId.testCV(FOLDS, n);         
 			   fc.buildClassifier(train);
-			   Enumeration<Instance> enums = newData.enumerateInstances();
+			  
 
 			   for (int i = 0; i < test.numInstances(); i++) {
 				   double pred = fc.classifyInstance(test.instance(i));
 				   System.out.print("ID: " + test.instance(i).value(0));
 				   System.out.print(", actual: " + test.classAttribute().value((int) test.instance(i).classValue()));
 				   System.out.println(", predicted: " + test.classAttribute().value((int) pred));
-				 }	   
-				   
-		//		   System.out.println(firstInstance.equals(secondFirstInstance));
-		//		   System.out.println(eval.evaluateModelOnce(cls, firstInstance));
-		//		   System.out.println(eval.evaluateModelOnce(cls, secondFirstInstance));
-				  // System.out.println("Ground truth label: " + ins.attribute((int)ins.classValue()) + "\t\t\t\t" +
-			//	   		"Predicted Label: " + eval.evaluateModelOnce(cls, ins));
-			   
-		 }
-		 //System.out.println(eval.toSummaryString());
-		 
-		 return null;
-	}
-		
-	public static void main (String[] args) throws Exception {
-		DataSource source = new DataSource("/Users/garrettsato/Downloads/mnist1000.pixel.arff");
-		J48 tree = new J48();
-		String[] options = new String[1];
-		options[0] = "-U"; 
-		tree.setOptions(options);
-		AbstractSaver j48tree = new AbstractSaver(source, 10, tree);
-		j48tree.evaluate();
-	}
-/*		 Evaluation eval = new Evaluation(data);
-		 eval.crossValidateModel(tree, data, 10, new Random(1));
-		 double[][] confusionMatrix = eval.confusionMatrix();
-		 
-		 // print the triangular array (same as above really)
-		 for (int r=0; r< confusionMatrix.length; r++) {
-		     for (int c=0; c< confusionMatrix[r].length; c++) {
-		         System.out.print(" " + confusionMatrix[r][c]);
-		     }
-		     System.out.println("");
-		 }
-		 
+				 }	   		   
+		 } 
 
-		 // load unlabeled data
-		 Instances unlabeled = new Instances(
-		                         new BufferedReader(
-		                           new FileReader("/Users/garrettsato/Downloads/mnist1000.pixel.arff")));
-		 
-		// set class attribute
-		 unlabeled.setClassIndex(unlabeled.numAttributes() - 1);
-		 
-		 Double[] unlabeledArray = new Double[unlabeled.numInstances()];
-		 Enumeration allInstances = unlabeled.enumerateInstances();
-		 int j = 0;
-		 while (allInstances.hasMoreElements()) {
-			 Instance ins = (Instance) allInstances.nextElement();
-			 unlabeledArray[j] = ins.classValue();
-			 j++;
-		 }
-		 
-	
-		 
-		 // create copy
-		 Instances labeled = new Instances(unlabeled);
-		 
-		 // label instances
-		 for (int i = 0; i < unlabeled.numInstances(); i++) {
-		   double clsLabel = tree.classifyInstance(unlabeled.instance(i));
-		   labeled.instance(i).setClassValue(clsLabel);
-		 }
-		 // save labeled data
-		 BufferedWriter writer = new BufferedWriter(
-		                           new FileWriter("/Users/garrettsato/labeled.arff"));
-		 writer.write(labeled.toString());
-		 Enumeration allInstancesShit = labeled.enumerateInstances();
-		 Double[] labeledArray = new Double[labeled.numInstances()];
-		 int k = 0;
-		 while (allInstancesShit.hasMoreElements()) {
-			 Instance ins = (Instance) allInstancesShit.nextElement();
-			 labeledArray[k] = ins.classValue();
-			 k++;
-		 }
-		 writer.newLine();
-		 writer.flush();
-		 writer.close();
-		 
-		 for (int i = 0; i < labeledArray.length; i++) {
-			 System.out.println("Ground truth label: " + unlabeledArray[i] + "\t\t\tPredicted Label: " + labeledArray[i]);
-		 }*/
-	
+	}
+
 }
