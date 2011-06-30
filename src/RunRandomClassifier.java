@@ -11,7 +11,7 @@ import weka.core.converters.ConverterUtils.DataSource;
 
 
 public class RunRandomClassifier {
-	
+//try	
 	public static void main (String[] args) throws Exception {
 		DataSource source = new DataSource("C:\\Users\\_Michael\\Dropbox\\Prospect Data\\digit\\mnist1000.pixel.arff");
 		//FileWriter fstream = new FileWriter("J48result");
