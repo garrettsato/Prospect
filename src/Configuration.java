@@ -5,39 +5,45 @@ import weka.classifiers.Classifier;
 import weka.classifiers.trees.J48;
 import weka.core.*;
 
+// Make Instances serialization
+
 
 public class Configuration {
 	
-	private double accuracy;
-	public Classifier classifier;
+	private String configName;
 	private String[] options;
-	private Map<Instance, Double> inst_to_pl;
+	private Classifier classifier;
+	private String[] predictedLabels;
+	private double[][] distributions;
 	
 	
-	public Configuration(Instances data) throws Exception {
-		classifier = new J48();
-		options = new String[1];
-		options[0] = "-U";
-		((J48) classifier).setOptions(options);
-		
-		Instances train = data.trainCV(4, 0);
-		classifier.buildClassifier(train);
-		
-		inst_to_pl = new HashMap<Instance, Double>();
-
+	public Configuration(String configName, String[] options) throws Exception {
+		this.configName = configName;
+		this.options = options;
+		predictedLabels = null;
+		distributions = null;
 	}
 	
-	
-	public void insertInstance(Instance example) {
-		inst_to_pl.put(example, example.classValue());
-		//System.out.println("adding Instance: " + example.classValue());
+	public Configuration(String configName, String[] options, int instancesSum, int classSum) throws Exception {
+		this(configName, options);
+		predictedLabels = new String[instancesSum];
+		distributions = new double[instancesSum][classSum];
 	}
 	
-	public Classifier getClassifier() {
-		return classifier;
+	public void setPredictedLabels(int ID, String predictedLabel) {
+		predictedLabels[ID] = predictedLabel;
 	}
 	
-	public int getMapSize() {
-		return inst_to_pl.size();
+	public String[] getPredictedLables() {
+		return predictedLabels;
 	}
+	
+	public void setDistribututions(int ID, double[] distribution) {
+		distributions[ID] = distribution;
+	}
+	
+	public double[][] getDistributions() {
+		return distributions;
+	}
+	
 }
