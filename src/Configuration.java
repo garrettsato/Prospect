@@ -29,7 +29,7 @@ public class Configuration {
 		predictedLabels = new String[instancesSum];
 		distributions = new double[instancesSum][classSum];
 	}
-	
+ 	
 	public void setPredictedLabels(int ID, String predictedLabel) {
 		predictedLabels[ID] = predictedLabel;
 	}
