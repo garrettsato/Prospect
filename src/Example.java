@@ -85,13 +85,14 @@ public class Example extends JFrame {
         
         file.add(open);
         menubar.add(file);
-        add(menubar, BorderLayout.NORTH);
+        getContentPane().add(menubar, BorderLayout.NORTH);
         
         pack();
-        add(basic);
+        getContentPane().add(basic);
+        add(new EditorTab());
 
         setTitle("First Try");
-        setSize(new Dimension(450, 350));
+        setSize(new Dimension(278, 315));
         setResizable(false);
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);

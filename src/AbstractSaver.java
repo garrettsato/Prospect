@@ -81,9 +81,9 @@ public class AbstractSaver {
 
 			   for (int i = 0; i < test.numInstances(); i++) {
 				   double pred = fc.classifyInstance(test.instance(i));
-				   area.append("ID: " + test.instance(i).value(0));
-				   area.append(", actual: " + test.classAttribute().value((int) test.instance(i).classValue()));
-				   area.append(", predicted: " + test.classAttribute().value((int) pred) + "\n");
+				   System.out.print("ID: " + test.instance(i).value(0));
+				   System.out.print(", actual: " + test.classAttribute().value((int) test.instance(i).classValue()));
+				   System.out.print(", predicted: " + test.classAttribute().value((int) pred) + "\n");
 				 }	   
 
 		//		   System.out.println(firstInstance.equals(secondFirstInstance));
@@ -93,7 +93,7 @@ public class AbstractSaver {
 			//	   		"Predicted Label: " + eval.evaluateModelOnce(cls, ins));
 
 		 }
-		 //System.out.println(eval.toSummaryString());
+		 System.out.println(eval.toSummaryString());
 
 		 return null;
 	}

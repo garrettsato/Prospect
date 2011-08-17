@@ -12,6 +12,17 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JButton;
+import javax.swing.JList;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import java.awt.Dimension;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JToggleButton;
 
 
 public class ProspectGUI {
@@ -46,20 +57,14 @@ public class ProspectGUI {
 	 */
 	private void initialize() {
 		frame = new JFrame();
+		frame.getContentPane().setLayout(new BorderLayout(0, 0));
 		
-		JMenuBar menuBar = new JMenuBar();
-		frame.setJMenuBar(menuBar);
+		JPanel panel = new JPanel();
+		frame.getContentPane().add(panel);
+		panel.setLayout(new BorderLayout(0, 0));
 		
-		JMenu mnMenu = new JMenu("Menu");
-		menuBar.add(mnMenu);
-		
-		JMenuItem open = new JMenuItem("Open");
-		open.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-			}
-		});
-		mnMenu.add(open);
+		JScrollPane scrollPane = new JScrollPane();
+		panel.add(scrollPane, BorderLayout.WEST);
 	}
 
 }
