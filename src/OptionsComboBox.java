@@ -20,4 +20,29 @@ public class OptionsComboBox extends OptionsComponent {
 	public boolean isTrueByDefault() {
 		return trueByDefault;
 	}
+	
+	public String getState() {
+		return (String) ((JComboBox) optionsComponent).getSelectedItem();
+	}
+	
+	@Override
+	public void setEnabled(boolean b) {
+		super.setEnabled(b);
+		((JComboBox) optionsComponent).setEnabled(b);
+	}
+	
+	@Override 
+	public void addActionListener(ClassifierPanel al) {
+		((JComboBox) optionsComponent).addActionListener(al);
+	}
+
+	public void initialSelection() {
+		if (trueByDefault) {
+			((JComboBox) optionsComponent).setSelectedItem("True");
+		} else {
+			((JComboBox) optionsComponent).setSelectedItem("False");
+		}
+	}
+	
+
 }

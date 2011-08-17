@@ -19,21 +19,23 @@ public class OptionsHandler {
 	public OptionsHandler() {
 	}
 	
-	public static Classifier[] createModel(ArrayList<JComponent> components, String classifierName) {
+	public static Classifier[] createModel(ArrayList<OptionsComponent> components, String classifierName) {
 		ArrayList<String> optionsList = new ArrayList<String>();
 		createString(components, 0, optionsList, "");
 		String errors = null;
 		int count = 0;
+		for (String option: optionsList) {
+			System.out.println(option);
+		}
 		Classifier[] classifierArray = new Classifier[optionsList.size()];
 		for (int i = 0; i < classifierArray.length; i++) {
 			String options = optionsList.get(i);
+			System.out.println(options + "n");
 			String[] optionsArray = null;
 			try {
-				optionsArray = weka.core.Utils.splitOptions(options);
-				classifierArray[i] = (Classifier)Utils.forName(Classifier.class, classifierName, optionsArray);
+				optionsArray = Utils.splitOptions(options);
+				classifierArray[i] = Classifier.forName(classifierName, optionsArray);
 			} catch (Exception e) {
-				e.printStackTrace();
-				count++;
 				errors += e.toString() + "\n";
 				errors += options + "\n";
 			}
@@ -49,28 +51,32 @@ public class OptionsHandler {
 	}
 	
 	
-	public static void createString(ArrayList<JComponent> components, 
+	public static void createString(ArrayList<OptionsComponent> components, 
 			int index, ArrayList<String> optionsList, String options) {
 		if (index >= components.size()) {
 			optionsList.add(options);
 			return;
 		} 
-		JComponent component = components.get(index + 1);
-		String label = ((JLabel)components.get(index)).getText();
-		String tag = label.substring(0, 2);
-		if (component instanceof JComboBox) {
-			String state = (String) ((JComboBox) component).getSelectedItem();
-			if (state.equals("True")) {
-				createString(components, index + 2, optionsList, options + tag + " " );
-			} else if (state.equals("False")) {
-				createString(components, index + 2, optionsList, options);
-
+		OptionsComponent component = components.get(index);
+		String tag = component.getTag();
+		if (component instanceof OptionsComboBox) {
+			OptionsComboBox comboBox = (OptionsComboBox) component;
+			boolean isTrueByDefault = comboBox.isTrueByDefault();
+			String state = comboBox.getState();
+			if (state.equals("Both")) {
+				createString(components, index + 1, optionsList, options + tag + " " );
+				createString(components, index + 1, optionsList, options);
+			} else if (state.equals("True")  != isTrueByDefault) {
+				createString(components, index + 1, optionsList, options + tag + " " );
 			} else {
-				createString(components, index + 2, optionsList, options + tag + " " );
-				createString(components, index + 2, optionsList, options);
+				createString(components, index + 1, optionsList, options);
 			}
-		} else if (component instanceof JTextField) {
-			createString(components, index + 2, optionsList, options + tag + " " + ((JTextField) component).getText() + " ");
+		} else if (component instanceof OptionsTextField) {
+			if (component.isEnabled()) { 
+				createString(components, index + 1, optionsList, options + tag + " " + ((OptionsTextField)component).getText() + " ");
+			} else {
+				createString(components, index + 1, optionsList, options);
+			}
 		}
 	}
 	

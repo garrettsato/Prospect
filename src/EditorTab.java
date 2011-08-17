@@ -99,7 +99,7 @@ public class EditorTab extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				Classifier[] classifiers = null;
-				ArrayList<JComponent>components = currentPanel.getModelComponents();
+				ArrayList<OptionsComponent> components = currentPanel.getOptionsComponents();
 				try {
 					classifiers = OptionsHandler.createModel(components, modelName);
 				} catch (Exception e) {
@@ -108,30 +108,29 @@ public class EditorTab extends JPanel {
 				}
 				int count = 0;
 				for (Classifier classifier: classifiers) {
-					System.out.println("this shit works");
 					count++;
-					System.out.println(classifier.toString());
+					System.out.println(classifier.toString() + "is this it");
 				}
 				//try this 
 				//will delete
 				//must delete
 				DataSource source = null;
-//				try {
-//					source = new DataSource("/Users/garrettsato/Downloads/mnist1000.pixel.arff");
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//				
-//				for (Classifier classifier: classifiers) {
-//					try {
-//						AbstractSaver saver = new AbstractSaver(source, 10, classifier, new JTextArea());
-//						saver.evaluate();
-//					} catch (Exception e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//				}
+				try {
+					source = new DataSource("/Users/garrettsato/Downloads/mnist1000.pixel.arff");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				for (Classifier classifier: classifiers) {
+					try {
+						AbstractSaver saver = new AbstractSaver(source, 10, classifier, new JTextArea());
+						saver.evaluate();
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 			}
 			
 		});
